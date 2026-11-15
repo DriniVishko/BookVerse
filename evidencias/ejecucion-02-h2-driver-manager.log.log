@@ -1,0 +1,42 @@
+2026-11-15 19:04:31.908 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 19:04:32.446 INFO  [main] com.bookverse.Main - FIN DE BOOKVERSE - PRUEBAS FINALIZADAS
+2026-11-15 22:17:46.385 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 22:17:47.048 INFO  [main] com.bookverse.Main - FIN DE BOOKVERSE - PRUEBAS FINALIZADAS
+2026-11-15 22:19:52.022 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 22:19:52.497 INFO  [main] com.bookverse.service.InventarioService - Reposición completada: libro=1, unidades=5
+2026-11-15 22:19:52.553 INFO  [main] com.bookverse.Main - FIN DE BOOKVERSE - PRUEBAS FINALIZADAS
+2026-11-15 22:22:52.103 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 22:22:52.597 ERROR [main] com.bookverse.database.ProcedimientosDao - Error SQL controlado. SQLState=23505, codigo=23505, mensaje=Violación de indice de Unicidad ó Clave primaria: "PUBLIC.CONSTRAINT_INDEX_4 ON PUBLIC.LIBRO(ISBN NULLS FIRST) VALUES ( /* 1 */ '9781501142970' )"
+Unique index or primary key violation: "PUBLIC.CONSTRAINT_INDEX_4 ON PUBLIC.LIBRO(ISBN NULLS FIRST) VALUES ( /* 1 */ '9781501142970' )"; SQL statement:
+INSERT INTO libro (titulo, isbn, precio, formato, editorial)
+VALUES (?, ?, ?, ?, ?) [23505-232]
+2026-11-15 22:22:52.597 INFO  [main] com.bookverse.service.InventarioService - Reposición completada: libro=1, unidades=5
+2026-11-15 22:22:52.643 INFO  [main] com.bookverse.Main - FIN DE BOOKVERSE - PRUEBAS FINALIZADAS
+2026-11-15 22:24:24.478 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 22:24:26.120 INFO  [main] com.bookverse.database.ProcedimientosDao - Procedimiento almacenado ejecutado: libro=1, stock=15
+2026-11-15 22:24:26.617 ERROR [main] com.bookverse.database.ProcedimientosDao - Error SQL controlado. SQLState=23000, codigo=1062, mensaje=Duplicate entry '9781501142970' for key 'libro.isbn'
+2026-11-15 22:24:26.626 INFO  [main] com.bookverse.service.InventarioService - Reposición completada: libro=1, unidades=5
+2026-11-15 22:24:26.720 INFO  [main] com.bookverse.Main - FIN DE BOOKVERSE - PRUEBAS FINALIZADAS
+2026-11-15 22:27:25.894 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 22:27:27.604 INFO  [main] com.bookverse.Main - Base de datos inicializada correctamente
+2026-11-15 23:12:28.959 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 23:12:30.770 INFO  [main] com.bookverse.Main - Base de datos inicializada correctamente
+2026-11-15 23:13:22.780 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 23:13:24.550 INFO  [main] com.bookverse.Main - Base de datos inicializada correctamente
+2026-11-15 23:13:53.102 ERROR [main] com.bookverse.Main - Error durante la opción 6
+java.lang.IllegalArgumentException: No se puede repetir un libro en el mismo pedido
+	at com.bookverse.service.PedidoService.realizarPedido(PedidoService.java:51) ~[classes/:?]
+	at com.bookverse.Main.main(Main.java:131) [classes/:?]
+2026-11-15 23:14:16.355 WARN  [main] com.bookverse.Main - Fallo de transacción simulado: Fallo de transacción simulado intencionadamente
+2026-11-15 23:14:16.355 INFO  [main] com.bookverse.Main - ROLLBACK CORRECTO: stock=15, pedidos=0
+2026-11-15 23:15:22.443 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 23:15:24.460 INFO  [main] com.bookverse.Main - Base de datos inicializada correctamente
+2026-11-15 23:15:37.926 INFO  [main] com.bookverse.Main - Pedido creado correctamente: id=1
+2026-11-15 23:16:09.324 ERROR [main] com.bookverse.database.ProcedimientosDao - Error SQL controlado. SQLState=23000, codigo=1062, mensaje=Duplicate entry '9781501142970' for key 'libro.isbn'
+2026-11-15 23:19:54.047 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 23:19:54.493 INFO  [main] com.bookverse.Main - Base de datos inicializada correctamente
+2026-11-15 23:20:28.026 INFO  [main] com.bookverse.service.InventarioService - Reposición completada: libro=1, unidades=5
+2026-11-15 23:20:46.935 INFO  [main] com.bookverse.Main - Pedido creado correctamente: id=1
+2026-11-15 23:21:04.691 WARN  [main] com.bookverse.Main - Fallo de transacción simulado: Fallo de transacción simulado intencionadamente
+2026-11-15 23:21:04.691 INFO  [main] com.bookverse.Main - ROLLBACK CORRECTO: stock=19, pedidos=1
+2026-11-15 23:21:13.777 INFO  [main] com.bookverse.Main - FIN DE BOOKVERSE

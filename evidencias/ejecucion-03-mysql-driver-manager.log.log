@@ -1,0 +1,8 @@
+2026-11-15 23:26:18.716 INFO  [main] com.bookverse.Main - INICIO DE BOOKVERSE
+2026-11-15 23:26:20.336 INFO  [main] com.bookverse.Main - Base de datos inicializada correctamente
+2026-11-15 23:26:41.152 INFO  [main] com.bookverse.Main - Pedido creado correctamente: id=1
+2026-11-15 23:26:58.742 INFO  [main] com.bookverse.database.ProcedimientosDao - Procedimiento almacenado ejecutado: libro=1, stock=13
+2026-11-15 23:27:06.584 WARN  [main] com.bookverse.Main - Fallo de transacción simulado: Fallo de transacción simulado intencionadamente
+2026-11-15 23:27:06.584 INFO  [main] com.bookverse.Main - ROLLBACK CORRECTO: stock=13, pedidos=1
+2026-11-15 23:27:12.885 ERROR [main] com.bookverse.database.ProcedimientosDao - Error SQL controlado. SQLState=23000, codigo=1062, mensaje=Duplicate entry '9781501142970' for key 'libro.isbn'
+2026-11-15 23:27:14.203 INFO  [main] com.bookverse.Main - FIN DE BOOKVERSE
