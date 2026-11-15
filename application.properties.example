@@ -1,0 +1,27 @@
+
+# BOOKVERSE - CONFIGURACIÓN DE EJEMPLO
+# Copiar este contenido a:
+# src/main/resources/application.properties
+
+# Motores disponibles: MYSQL, H2
+database.engine=MYSQL
+
+# Modos disponibles: DRIVER_MANAGER, HIKARI
+connection.mode=HIKARI
+
+# Modos disponibles: NORMAL, FALLO_TRANSACCION
+simulation.mode=NORMAL
+
+# Configuración MySQL
+mysql.url=jdbc:mysql://localhost:3306/unidad2
+mysql.user=root
+
+# La contraseña se lee de BOOKVERSE_DB_PASSWORD
+# No escribir contraseñas en este archivo.
+
+# Configuración H2
+h2.url=jdbc:h2:mem:bookverse;MODE=MySQL;DB_CLOSE_DELAY=-1
+h2.user=sa
+
+# Pool de conexiones
+hikari.maximumPoolSize=5
