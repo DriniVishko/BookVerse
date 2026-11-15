@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AutorDAO {
+public class AutorDao {
 
     public int insertarAutor(Connection conexion, String nombre) throws SQLException {
         String sql="INSERT INTO autor (nombre) VALUES (?)";
