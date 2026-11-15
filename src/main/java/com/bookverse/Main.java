@@ -1,30 +1,38 @@
 
 package com.bookverse;
 
-import com.bookverse.database.DatabaseInitializer;
-import com.bookverse.database.DatabaseSeeder;
+import com.bookverse.database.*;
+import com.bookverse.model.LineaPedido;
 import com.bookverse.service.PedidoService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import com.bookverse.database.ConsultasDao;
+import com.bookverse.service.InventarioService;
+import com.bookverse.database.ProcedimientosDao;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class Main {
+    private static final Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
 
-        String url = "jdbc:mysql://localhost:3306/unidad2";
-        String usuario = "root";
-        String password = System.getenv("BOOKVERSE_DB_PASSWORD");
+        logger.info("INICIO DE BOOKVERSE");
 
-        try (Connection conexion =
-                     DriverManager.getConnection(url, usuario, password)) {
+        DatabaseConfig config = new DatabaseConfig();
 
-            System.out.println("Conexión correcta con MySQL.");
+        try (ConnectionFactory factory = new ConnectionFactory(config);
+             Connection conexion = factory.getConnection()) {
 
-            // Reiniciar la base de datos
+            System.out.println(
+                    "Motor: " + factory.getEngine()
+                            + " | Conexión: " + factory.getMode()
+            );
+
             DatabaseInitializer.eliminarTablas(conexion);
 
             DatabaseInitializer.crearTablaLibros(conexion);
@@ -39,70 +47,116 @@ public class Main {
 
             DatabaseSeeder.insertarDatosIniciales(conexion);
 
-            PedidoService pedidoService = new PedidoService();
+            ProcedimientosDao procedimientos = new ProcedimientosDao();
 
-            // PRUEBA 1: compra correcta
+            if (factory.getEngine().equalsIgnoreCase("MYSQL")) {
+                System.out.println("\n=== PROCEDIMIENTO ALMACENADO MYSQL ===");
+
+                int stockProcedimiento =
+                        procedimientos.consultarStockConProcedimiento(conexion, 1);
+
+                System.out.println(
+                        "Stock obtenido mediante CallableStatement: "
+                                + stockProcedimiento
+                );
+            }
+
+            System.out.println("\n=== ERROR SQL CONTROLADO ===");
+            procedimientos.provocarErrorIntegridad(conexion);
+
+            InventarioService inventarioService = new InventarioService();
+
+            System.out.println("\n=== PRUEBA DE REPOSICIÓN ===");
+
+            int stockAntesReposicion = consultarStock(conexion, 1);
+
+            inventarioService.reponerStock(conexion, 1, 5);
+
+            int stockDespuesReposicion = consultarStock(conexion, 1);
+
+            System.out.println("Stock antes de reponer: " + stockAntesReposicion);
+            System.out.println("Stock después de reponer: " + stockDespuesReposicion);
+
+            ConsultasDao consultas = new ConsultasDao();
+
+            System.out.println("\n=== PRUEBA DE CONSULTAS SQL ===");
+
+            // JOIN: catálogo con autores y stock
+            consultas.mostrarCatalogoConStock(conexion);
+
+            // Paginación SQL
+            System.out.println("\n=== CATÁLOGO PAGINADO ===");
+            consultas.listarCatalogoPaginado(conexion, 1, 5)
+                    .forEach(System.out::println);
+
+            // Estadísticas con GROUP BY
+            System.out.println("\n=== ESTADÍSTICAS DE VENTAS ===");
+            consultas.obtenerEstadisticasVentas(conexion)
+                    .forEach(System.out::println);
+
+            // Inventario bajo mínimos
+            consultas.mostrarLibrosBajoMinimo(conexion);
+
+            PedidoService servicio = new PedidoService();
+
             int stockInicial = consultarStock(conexion, 1);
 
-            int idPedido = pedidoService.realizarPedido(
+            int idPedido = servicio.realizarPedido(
                     conexion,
                     1,
-                    java.util.List.of(
-                            new com.bookverse.model.LineaPedido(1, 2),
-                            new com.bookverse.model.LineaPedido(2, 1)
+                    List.of(
+                            new LineaPedido(1, 2),
+                            new LineaPedido(2, 1)
                     ),
                     false
             );
 
             System.out.println("Pedido creado: " + idPedido);
-            System.out.println("Stock inicial: " + stockInicial);
+            System.out.println("Stock inicial IT: " + stockInicial);
             System.out.println(
-                    "Stock después de comprar: "
+                    "Stock después de comprar IT: "
                             + consultarStock(conexion, 1)
             );
 
-            // PRUEBA 2: cancelación
-            pedidoService.cancelarPedido(conexion, idPedido);
+            servicio.cancelarPedido(conexion, idPedido);
 
             System.out.println(
-                    "Stock después de cancelar: "
+                    "Stock después de cancelar IT: "
                             + consultarStock(conexion, 1)
             );
 
-            // PRUEBA 3: fallo intencionado
-            int stockAntesFallo = consultarStock(conexion, 1);
+            boolean simularFallo = config.get("simulation.mode")
+                    .equalsIgnoreCase("FALLO_TRANSACCION");
+
+            int stockAntes = consultarStock(conexion, 1);
 
             try {
-                pedidoService.realizarPedido(
-                        conexion, 1, 1, 3, true
+                servicio.realizarPedido(
+                        conexion, 1, 1, 3, simularFallo
                 );
             } catch (SQLException e) {
-                System.out.println(
-                        "Fallo esperado: " + e.getMessage()
-                );
+                if (!simularFallo) {
+                    throw e;
+                }
+                System.out.println("Fallo esperado: " + e.getMessage());
             }
 
-            int stockDespuesFallo = consultarStock(conexion, 1);
+            int stockDespues = consultarStock(conexion, 1);
 
-            System.out.println(
-                    "Stock antes del fallo: " + stockAntesFallo
-            );
-            System.out.println(
-                    "Stock después del rollback: " + stockDespuesFallo
-            );
-
-            if (stockAntesFallo == stockDespuesFallo) {
+            if (simularFallo) {
+                if (stockAntes != stockDespues) {
+                    throw new IllegalStateException(
+                            "ERROR: rollback incorrecto"
+                    );
+                }
                 System.out.println("ROLLBACK CORRECTO");
-            } else {
-                throw new IllegalStateException(
-                        "ERROR: el rollback no restauró el stock"
-                );
             }
 
             System.out.println("PRUEBAS FINALIZADAS");
+            logger.info("FIN DE BOOKVERSE - PRUEBAS FINALIZADAS");
 
-        } catch (SQLException e) {
-            System.err.println("Error SQL: " + e.getMessage());
+        } catch (SQLException | RuntimeException e) {
+            System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -111,25 +165,22 @@ public class Main {
             Connection conexion, int idLibro
     ) throws SQLException {
 
-        String sql = """
-                SELECT stock
-                FROM inventario
-                WHERE id_libro = ?
-                """;
+        try (PreparedStatement ps = conexion.prepareStatement("""
+                SELECT stock FROM inventario WHERE id_libro = ?
+                """)) {
 
-        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setInt(1, idLibro);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
                     throw new SQLException(
-                            "No existe inventario para el libro " + idLibro
+                            "Inventario inexistente: " + idLibro
                     );
                 }
-
                 return rs.getInt("stock");
             }
         }
     }
 }
+
 
